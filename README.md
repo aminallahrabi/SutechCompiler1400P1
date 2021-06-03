@@ -39,4 +39,4 @@ make_less_than : detect the (=) after the (>) character .
 skip_comment : check the comment is single or multy line or is div(/)token.
 plus_or_plusplus : detect the token is only (+) or (++).
 
-written by mohammad.amin.allahrabi.
+
