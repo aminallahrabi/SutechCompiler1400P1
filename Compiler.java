@@ -11,10 +11,7 @@ import java.io.IOException;
 import static java.lang.System.out;
 import java.util.ArrayList;
 
-/**
- *
- * @author AminAll
- */
+
 public class Compiler {
 
     /**
@@ -27,14 +24,16 @@ public class Compiler {
             String text = "";
             while ((c=br.read())!=-1) {
                 char character =(char) c;          //converting integer to char
-                out.println(character);
                 text += character;
             }
             Lexer Lex = new Lexer("io.txt", text);
-            ArrayList<Token> r = Lex.make_tokens();
-            for(int i=0 ; i <r.size(); i++ ) {
-                out.println(r.get(i).toString());
+            ArrayList<Token> t = Lex.make_tokens();
+            out.println("-------------------------------------------");
+            for(int i=0 ; i <t.size(); i++ ) {
+                out.println(t.get(i).toString());
             }
+//            Management m = new Management(t); for manage the token that visited and call error handler
+//            m.manage();
         } catch (IOException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();

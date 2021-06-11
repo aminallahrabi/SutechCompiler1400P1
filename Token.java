@@ -6,12 +6,12 @@
 package compiler2;
 
 class Token {
-
+    String name;
     String type;
     String value;
     int pos_start;
     int pos_end;
-    public Position positions;
+    public Position positions = new Position(0, 0, 0);
 
     Token(String type, String value, Position p) {
         if (type == null) {
@@ -19,7 +19,7 @@ class Token {
         }
         this.type = type;
         this.value = value;
-        if (positions != null) {
+        if (p != null) {
             this.pos_start = p.index;
             this.pos_end = pos_start + 1;
             this.positions = p;

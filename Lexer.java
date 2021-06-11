@@ -16,20 +16,20 @@ public class Lexer {
 
     String fileName = null;
     String text = null;
-    public static Position positions = null;
+    Position positions = null;
     String currentChar = null;
 
     Lexer(String fileName, String text) {
         this.fileName = fileName;
         this.text = text;
-        this.positions = new Position(-1, 0, -1, fileName, text);
+        this.positions = new Position(-1, 0, -1);
         this.currentChar = null;
         advance();
     }
 
     public void advance() {
         this.positions.advance(this.currentChar);
-        if (this.positions.index < this.text.length()) {
+        if (this.positions.copy().index < this.text.length()) {
             char current = this.text.charAt(this.positions.index);
             this.currentChar = Character.toString(current);
         } else {
@@ -42,11 +42,10 @@ public class Lexer {
         ArrayList<Token> tokenize = new ArrayList<Token>();
         ArrayList<Error> err = new ArrayList<>();
         while (currentChar != null) {
-            out.println("while cuurent =" + this.currentChar);
+
             
             if (this.currentChar.equals(" ") || this.currentChar.equals("\t")) {
                 advance();
-                out.println("if"+currentChar);
             } else if (Tokens.digits.contains(this.currentChar)) {
                 tokenize.add(make_number());
             } else if (Tokens.LETTERS.contains(this.currentChar)) {
@@ -67,22 +66,22 @@ public class Lexer {
 //                    for set error
                 }
             } else if (this.currentChar.equals(";")) {
-                tokenize.add(new Token(Tokens.T_ENDCOMMAND,this.positions));
+                tokenize.add(new Token(Tokens.T_ENDCOMMAND,this.positions.copy()));
                 advance();
             } else if (this.currentChar.equals("\n")) {
-                tokenize.add(new Token(Tokens.T_NEWLINE, this.positions));
+                tokenize.add(new Token(Tokens.T_NEWLINE, this.positions.copy()));
                 advance();
 
             } else if (this.currentChar.equals("+")) {
                 tokenize.add(Plus_Or_PlusPlus());
             } else if (this.currentChar.equals("*")) {
-                tokenize.add(new Token(Tokens.T_MUL,this.positions));
+                tokenize.add(new Token(Tokens.T_MUL,this.positions.copy()));
                 advance();
             } else if (this.currentChar.equals("%")) {
-                tokenize.add(new Token(Tokens.T_REMINDER, this.positions));
+                tokenize.add(new Token(Tokens.T_REMINDER, this.positions.copy()));
                 advance();
             } else if (this.currentChar.equals("^")) {
-                tokenize.add(new Token(Tokens.T_POW,this.positions));
+                tokenize.add(new Token(Tokens.T_POW,this.positions.copy()));
                 advance();
             }
             else if (this.currentChar.equals("=")) {
@@ -100,45 +99,44 @@ public class Lexer {
             } else if (this.currentChar.equals(">")) {
                     tokenize.add(make_greater_than());
             } else if (this.currentChar.equals(",")) {
-                tokenize.add(new Token(Tokens.T_COMMA, this.positions));
+                tokenize.add(new Token(Tokens.T_COMMA, this.positions.copy()));
                 this.advance();
             }
             else if (this.currentChar.equals("(")) {
-                tokenize.add(new Token(Tokens.T_LPAREN, this.positions));
+                tokenize.add(new Token(Tokens.T_LPAREN, this.positions.copy()));
                 advance();
             }  else if (this.currentChar.equals(")")){
-                tokenize.add(new Token(Tokens.T_RPAREN, this.positions));
+                tokenize.add(new Token(Tokens.T_RPAREN, this.positions.copy()));
                 advance();
             }else if (this.currentChar.equals("{")) {
-                tokenize.add(new Token(Tokens.T_LSQUARE, this.positions));
+                tokenize.add(new Token(Tokens.T_LSQUARE, this.positions.copy()));
                 advance();
             }  else if (this.currentChar.equals("}")){
-                tokenize.add(new Token(Tokens.T_RSQUARE, this.positions));
+                tokenize.add(new Token(Tokens.T_RSQUARE, this.positions.copy()));
                 advance();
             }
             else if (this.currentChar.equals("[") ) {
-                tokenize.add(new Token(Tokens.T_LBRACKET, this.positions));
+                tokenize.add(new Token(Tokens.T_LBRACKET, this.positions.copy()));
                 advance();
             }  
             else if (this.currentChar.equals("[")){
-                tokenize.add(new Token(Tokens.T_RBRACKET, this.positions));
+                tokenize.add(new Token(Tokens.T_RBRACKET, this.positions.copy()));
                 advance();
             }
             else{
                 advance();
                 String current = this.currentChar;
-                out.println("else"+current);
                 String index = String.valueOf(positions.index);
                 Error e = new Error();
                 err.add(e.IllegalCharError(index, positions, current));
             }
             
         }
-        tokenize.add(new Token(Tokens.T_EOF, this.positions));
+        tokenize.add(new Token(Tokens.T_EOF, this.positions.copy()));
         return tokenize;
     }
     //////////////////////////////////////////////////////////////////////////
-//check
+
     public Token make_number() {
 
         String num_str = "";
@@ -154,12 +152,12 @@ public class Lexer {
             advance();
         }
         if (dot_count == 0) {
-            return new Token(Tokens.T_INT, num_str, this.positions);
+            return new Token(Tokens.T_INT, num_str, this.positions.copy());
         }
-        return new Token(Tokens.T_FLOAT, num_str, this.positions);
+        return new Token(Tokens.T_FLOAT, num_str, this.positions.copy());
     }
 ///////////////////////////////////////////////////////////////////////////
-//check
+
     public Token make_string() {
         String str = "";
         advance();
@@ -174,10 +172,10 @@ public class Lexer {
                 }
         }
         advance();
-        return new Token(Tokens.T_STRING, str, this.positions);
+        return new Token(Tokens.T_STRING, str, this.positions.copy().copy());
     }
 /////////////////////////////////////////////////////////////////////////////////////////////////
-//check
+
     public Token make_identifier() {
         String id_str = "";
         String TokenType = "";
@@ -190,38 +188,39 @@ public class Lexer {
         } else {
             TokenType = Tokens.T_IDENTIFIER;
         }
-        return new Token(TokenType, id_str, this.positions);
+        
+        return new Token(TokenType, id_str, positions.copy());
     }
 
 ///////////////////////////////////////////////////////////////////////////////////
-//check
+
     public Token make_minus_or_arrow() {
         advance();
 
         if (this.currentChar.equals(">")) {
             advance();
-            return new Token(Tokens.T_ARROW, positions = this.positions);
+            return new Token(Tokens.T_ARROW, this.positions.copy());
         } else if (this.currentChar.equals("-")) {
             this.advance();
-            return new Token(Tokens.T_MINUSMINUS, positions = this.positions);
+            return new Token(Tokens.T_MINUSMINUS, this.positions.copy());
         } else {
-            return new Token(Tokens.T_MINUS, positions = this.positions);
+            return new Token(Tokens.T_MINUS, this.positions.copy());
         }
     }
 //////////////////////////////////////////////////////////////////////////////////////////////
-//CHECK
+
     public Token make_not_equals() {
         advance();
         if (this.currentChar.equals("=")) {
 
             this.advance();
-            return new Token(Tokens.T_NE, this.positions);
+            return new Token(Tokens.T_NE, this.positions.copy());
         }
         return null;
-////     ExpectedCharError(pos_start, this.positions, ""=" (after "!")");
+////     ExpectedCharError(pos_start, this.positions.copy(), ""=" (after "!")");
     }
 //////////////////////////////////////////////////////////////////////
-//check
+
     public Token make_equals() {
         String tokType = Tokens.T_EQ;
         advance();
@@ -229,10 +228,10 @@ public class Lexer {
             advance();
             tokType = Tokens.T_EE;
         }
-        return new Token(tokType, positions = this.positions);
+        return new Token(tokType,this.positions.copy());
     }
 //////////////////////////////////////////////////////////////////////////////////////////
-//check
+
     public Token make_less_than() {
         String tokType = Tokens.T_LT;
         advance();
@@ -241,10 +240,10 @@ public class Lexer {
             advance();
             tokType = Tokens.T_LTE;
         }
-        return new Token(tokType, positions = this.positions);
+        return new Token(tokType, this.positions.copy());
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////                
-//check
+
     public Token make_greater_than() {
         String tokType = Tokens.T_GT;
         advance();
@@ -253,10 +252,10 @@ public class Lexer {
             tokType = Tokens.T_GTE;
             advance();
         }
-        return new Token(tokType, positions = this.positions);
+        return new Token(tokType, this.positions.copy());
     }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-//check
+
     public Token skip_comment() {
         advance();
         if (this.currentChar.equals("/")) {
@@ -278,19 +277,19 @@ public class Lexer {
             }
             advance();
         } else {
-            return new Token(Tokens.T_DIV, positions = this.positions);
+            return new Token(Tokens.T_DIV,  this.positions.copy());
         }
 
-        return new Token(Tokens.T_COMMENT, positions = this.positions);
+        return new Token(Tokens.T_COMMENT, this.positions.copy());
     }
 //////////////////////////////////////////////////////////////////////////////////////             
-//check
+
     public Token Plus_Or_PlusPlus() {
         advance();
         if (this.currentChar.equals("+")) {
             advance();
-            return new Token(Tokens.T_PLUSPLUS, positions = this.positions);
+            return new Token(Tokens.T_PLUSPLUS, positions = this.positions.copy());
         }
-        return new Token(Tokens.T_PLUS, positions = this.positions);
+        return new Token(Tokens.T_PLUS, positions = this.positions.copy());
     }
 }
